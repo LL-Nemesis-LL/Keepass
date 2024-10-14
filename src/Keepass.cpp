@@ -6,6 +6,30 @@
 
 Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
 {
+    std::ifstream file(this->_fileSaveName);
+    std::string content;
+    if (!file.is_open())
+    {
+        return;
+    }
+    while (!file.eof())
+    {
+        std::getline(file, content);
+
+        size_t userIndex = content.find('\\') + 1;
+        if (userIndex < 1)
+        {
+            break;
+        }
+        size_t passwordIndex = content.find('\\', userIndex) + 1;
+
+        std::string account = content.substr(0, userIndex - 1);
+        std::string user = content.substr(userIndex, passwordIndex - userIndex - 1);
+        std::string password = content.substr(passwordIndex, content.size() - passwordIndex);
+
+        this->add(account, user, password);
+    }
+    file.close();
 }
 
 bool Keepass::add(const std::string &account, const std::string &user, const std::string &password)

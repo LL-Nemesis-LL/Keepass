@@ -18,9 +18,8 @@ void test()
     it = safeDeposit.get(account);
 
     assert(it->first.compare(account) == 0);
-    assert(it->second.user == user);
-    assert(it->second.password == password);
-    it = safeDeposit.get("null");
+    assert(it->second.user.compare(user) == 0);
+    assert(it->second.password.compare(password) == 0);
 
     // Test de la politique des valeurs d'entrées
     assert(!safeDeposit.add("test\\", user, password));
@@ -35,12 +34,19 @@ void test()
     file.seekg(0, file.end);
     size_t fileSize = file.tellg();
     file.seekg(0, file.beg);
-    std::cout << fileSize;
+
     assert(fileSize == 32);
 
     std::string content;
     std::getline(file, content);
-    std::cout << content << std::endl;
+
+    // Test restauration
+    Keepass safeDepositRestauration(fileName);
+    it = safeDepositRestauration.get(account);
+
+    assert(it->first.compare(account) == 0);
+    assert(it->second.user.compare(user) == 0);
+    assert(it->second.password.compare(password) == 0);
 
     std::cout << "Test ok" << std::endl;
 }
