@@ -37,7 +37,7 @@ void test()
     file.seekg(0, file.end);
     size_t fileSize = file.tellg();
     file.seekg(0, file.beg);
-    assert(fileSize == 68);
+    assert(fileSize == 64);
 
     std::string content;
     std::getline(file, content);

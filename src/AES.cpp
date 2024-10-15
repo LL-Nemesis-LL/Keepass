@@ -535,6 +535,7 @@ std::vector<unsigned char> AES::DecryptCFB(std::vector<unsigned char> in,
 const std::string EasyAES::encrypt(const std::string &text, const std::string &key)
 {
   // text length multiple of 16 bytes
+  const int keyLen = key.size() % 16;
   const unsigned int blockSize = 16;
   unsigned int paddingLength = blockSize - (text.size() % blockSize);
   unsigned int paddedLen = text.size() + paddingLength;
@@ -550,8 +551,13 @@ const std::string EasyAES::encrypt(const std::string &text, const std::string &k
 
   // QUITE UNSAFE: password is padded/truncated to match 128 bits
   unsigned char ckey[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-  std::memcpy(ckey, key.c_str(), 16);
-
+  std::memcpy(ckey, key.c_str(), keyLen);
+  std::cout << "ckey : ";
+  for (int i = 0; i < 16; i++)
+  {
+    std::cout << (int)ckey[i] << ", ";
+  }
+  std::cout << std::endl;
   unsigned char *cipher = aes.EncryptECB(plain, paddedLen * sizeof(unsigned char), ckey);
   std::string cipher_str(reinterpret_cast<char const *>(cipher), paddedLen);
   return cipher_str;
@@ -559,28 +565,26 @@ const std::string EasyAES::encrypt(const std::string &text, const std::string &k
 
 const std::string EasyAES::decrypt(const std::string &cipher, const std::string &key)
 {
+  const int keyLen = key.size() % 16;
   unsigned int dataLen = cipher.size();
+  std::cout << "taille cipher : " << dataLen << std::endl;
   unsigned char *plain = (unsigned char *)cipher.c_str();
 
   // QUITE UNSAFE: password is padded/truncated to match 128 bits
   unsigned char ckey[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}; // key example
-  std::memcpy(ckey, key.c_str(), 16);
-  std::cout << "ckey : ";
-  for (int i = 0; i < 16; i++)
-  {
-    std::cout << ckey[i] << ", ";
-  }
+  std::memcpy(ckey, key.c_str(), keyLen);
   std::cout << std::endl;
   unsigned char *decipher = aes.DecryptECB(plain, dataLen * sizeof(unsigned char), ckey);
-
   unsigned char paddingLength = decipher[dataLen - 1];
   // checking padding validity
+  std::cout << "taille padding : " << (int)paddingLength << std::endl;
   if (paddingLength > dataLen || paddingLength == 0)
   {
     throw std::invalid_argument("Invalid padding length");
   }
-  for (unsigned int i = cipher.size() - paddingLength; i < dataLen; ++i)
+  for (unsigned int i = dataLen - paddingLength; i < dataLen; ++i)
   {
+    std::cout << decipher[i] << std::endl;
     if (decipher[i] != paddingLength)
     {
       throw std::invalid_argument("Invalid padding");

@@ -6,26 +6,29 @@
 
 Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
 {
-    std::ifstream file(this->_fileSaveName, std::ios::in);
+    std::ifstream file(this->_fileSaveName, std::ios::in | std::ios::binary);
     if (!file.is_open())
     {
         return;
     }
-    int i = 0;
+    // déterminer la taile du file
+    file.seekg(0, file.end);
+    size_t fileSaveSize = file.tellg();
+    file.seekg(0, file.beg);
+
+    // récupérer toutes les données
+    char fileContent[fileSaveSize + 1];
+    file.read(fileContent, fileSaveSize);
+    // std::cout << "Données fichier :" << fileContent.size() << std::endl;
+    //  déchiffrer les données
+    std::stringstream accountData;
+    accountData << this->aes.decrypt(fileContent, this->_key);
+
     std::cout << "Debut de la restauration\n\n";
-    while (!file.eof())
+    std::string accountEncode;
+    while (std::getline(accountData, accountEncode))
     {
-        std::string accountEncrypt;
-        std::getline(file, accountEncrypt);
-        if (accountEncrypt.size() == 0)
-        {
-            break;
-        }
-        i++;
-        std::string accountEncode = this->aes.decrypt(accountEncrypt, this->_key);
-
         AccountEntries accountDecode = this->decode(accountEncode);
-
         this->add(accountDecode.platform, accountDecode.ID.username, accountDecode.ID.password);
     }
     std::cout << "fin de la restauration\n\n";
@@ -76,7 +79,7 @@ std::string Keepass::encode(std::map<std::string, IDEntries>::iterator &it)
 {
     std::stringstream accountEncode;
 
-    accountEncode << it->first << sepEntries << it->second.username << sepEntries << it->second.password;
+    accountEncode << it->first << sepEntries << it->second.username << sepEntries << it->second.password << '\n';
     return accountEncode.str();
 }
 
@@ -98,7 +101,7 @@ std::stringstream Keepass::formatForSave()
     std::map<std::string, IDEntries>::iterator it;
     for (it = std::begin(this->safeDepositAccount); it != std::end(this->safeDepositAccount); ++it)
     {
-        saveDeposit << this->aes.encrypt(this->encode(it), this->_key) << '\n';
+        saveDeposit << this->encode(it);
     }
     return saveDeposit;
 }
@@ -106,7 +109,8 @@ std::stringstream Keepass::formatForSave()
 Keepass::~Keepass()
 {
     std::string saveDeposit = this->formatForSave().str();
+    std::string dataEncrypt = this->aes.encrypt(saveDeposit, this->_key);
     std::ofstream file(this->_fileSaveName, std::ios::out | std::ios::trunc);
-    file << saveDeposit;
+    file << dataEncrypt;
     file.close();
 }
