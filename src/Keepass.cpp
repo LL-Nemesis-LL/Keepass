@@ -15,9 +15,7 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
     while (!file.eof())
     {
         std::getline(file, content);
-
-        size_t userIndex = content.find('\\') + 1;
-        if (userIndex < 1)
+        if (content.find('\\') == std::string::npos)
         {
             break;
         }
