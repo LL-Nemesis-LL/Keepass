@@ -6,19 +6,23 @@
 
 Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
 {
-    std::ifstream file(this->_fileSaveName);
-    std::string accountEncode;
+    std::ifstream file(this->_fileSaveName, std::ios::in);
     if (!file.is_open())
     {
         return;
     }
+    int i = 0;
     while (!file.eof())
     {
-        std::getline(file, accountEncode);
-        if (accountEncode.find('\\') == std::string::npos)
+        std::string accountEncrypt;
+        std::getline(file, accountEncrypt);
+        if (accountEncrypt.size() == 0)
         {
             break;
         }
+        i++;
+        std::string accountEncode = this->aes.decrypt(accountEncrypt, this->_key);
+
         AccountEntries accountDecode = this->decode(accountEncode);
 
         this->add(accountDecode.platform, accountDecode.ID.username, accountDecode.ID.password);
@@ -40,9 +44,9 @@ bool Keepass::add(const std::string &platform, const std::string &username, cons
 
 enum Incorrect Keepass::checkEntry(const std::string &platform, const std::string &username, const std::string &password)
 {
-    bool checkPlatform = platform.find('\\') == std::string::npos;
-    bool checkUsername = username.find('\\') == std::string::npos;
-    bool checkPassword = password.find('\\') == std::string::npos;
+    bool checkPlatform = platform.find(sepEntries) == std::string::npos;
+    bool checkUsername = username.find(sepEntries) == std::string::npos;
+    bool checkPassword = password.find(sepEntries) == std::string::npos;
     if (checkPlatform && checkUsername && checkPassword)
     {
         return Incorrect::Nothing;
@@ -69,15 +73,16 @@ std::map<std::string, IDEntries>::iterator Keepass::get(const std::string &platf
 std::string Keepass::encode(std::map<std::string, IDEntries>::iterator &it)
 {
     std::stringstream accountEncode;
-    accountEncode << it->first << '\\' << it->second.username << '\\' << it->second.password << '\n';
+
+    accountEncode << it->first << sepEntries << it->second.username << sepEntries << it->second.password;
     return accountEncode.str();
 }
 
 AccountEntries Keepass::decode(std::string accountEncode)
 {
     AccountEntries entries;
-    size_t usernameIndex = accountEncode.find('\\') + 1;
-    size_t passwordIndex = accountEncode.find('\\', usernameIndex) + 1;
+    size_t usernameIndex = accountEncode.find(sepEntries) + 1;
+    size_t passwordIndex = accountEncode.find(sepEntries, usernameIndex) + 1;
 
     entries.platform = accountEncode.substr(0, usernameIndex - 1);
     entries.ID.username = accountEncode.substr(usernameIndex, passwordIndex - usernameIndex - 1);
@@ -91,7 +96,7 @@ std::stringstream Keepass::formatForSave()
     std::map<std::string, IDEntries>::iterator it;
     for (it = std::begin(this->safeDepositAccount); it != std::end(this->safeDepositAccount); ++it)
     {
-        saveDeposit << this->encode(it);
+        saveDeposit << this->aes.encrypt(this->encode(it), this->_key) << '\n';
     }
     return saveDeposit;
 }
