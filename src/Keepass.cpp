@@ -58,6 +58,16 @@ bool Keepass::exists(const std::string &platform)
     return false;
 }
 
+bool Keepass::remove(const std::string &platform)
+{
+    if (this->exists(platform))
+    {
+        this->safeDepositAccount.erase(platform);
+        return true;
+    }
+    return false;
+}
+
 enum Incorrect Keepass::checkEntry(const std::string &platform, const std::string &username, const std::string &password)
 {
     bool checkPlatform = platform.find(sepEntries) == std::string::npos;

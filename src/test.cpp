@@ -56,5 +56,9 @@ void test()
     assert(safeDepositRestauration.exists(platform) == true);
     assert(safeDepositRestauration.exists("aleatoire") == false);
 
+    // Test de la méthode "remove"
+    assert(safeDepositRestauration.remove("Facebook") == true);
+    assert(safeDepositRestauration.remove("aleatoire") == false);
+
     std::cout << "Test ok" << std::endl;
 }

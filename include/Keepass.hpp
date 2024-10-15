@@ -39,6 +39,7 @@ public:
     bool add(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries>::iterator get(const std::string &plateform);
     bool exists(const std::string &platform);
+    bool remove(const std::string &platforme);
     ~Keepass();
 
 private:
