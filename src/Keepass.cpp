@@ -21,7 +21,7 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
         }
         AccountEntries accountDecode = this->decode(accountEncode);
 
-        this->add(accountDecode.platform, accountDecode.username, accountDecode.password);
+        this->add(accountDecode.platform, accountDecode.ID.username, accountDecode.ID.password);
     }
     file.close();
 }
@@ -80,8 +80,8 @@ AccountEntries Keepass::decode(std::string accountEncode)
     size_t passwordIndex = accountEncode.find('\\', usernameIndex) + 1;
 
     entries.platform = accountEncode.substr(0, usernameIndex - 1);
-    entries.username = accountEncode.substr(usernameIndex, passwordIndex - usernameIndex - 1);
-    entries.password = accountEncode.substr(passwordIndex, accountEncode.size() - passwordIndex);
+    entries.ID.username = accountEncode.substr(usernameIndex, passwordIndex - usernameIndex - 1);
+    entries.ID.password = accountEncode.substr(passwordIndex, accountEncode.size() - passwordIndex);
     return entries;
 }
 

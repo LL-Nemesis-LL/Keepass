@@ -25,8 +25,7 @@ struct IDEntries
 struct AccountEntries
 {
     std::string platform;
-    std::string username;
-    std::string password;
+    IDEntries ID;
 };
 class Keepass
 {
