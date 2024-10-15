@@ -19,19 +19,17 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
     // récupérer toutes les données
     char fileContent[fileSaveSize + 1];
     file.read(fileContent, fileSaveSize);
-    // std::cout << "Données fichier :" << fileContent.size() << std::endl;
+
     //  déchiffrer les données
     std::stringstream accountData;
     accountData << this->aes.decrypt(fileContent, this->_key);
 
-    std::cout << "Debut de la restauration\n\n";
     std::string accountEncode;
     while (std::getline(accountData, accountEncode))
     {
         AccountEntries accountDecode = this->decode(accountEncode);
         this->add(accountDecode.platform, accountDecode.ID.username, accountDecode.ID.password);
     }
-    std::cout << "fin de la restauration\n\n";
     file.close();
 }
 
