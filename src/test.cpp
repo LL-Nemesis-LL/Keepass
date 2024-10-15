@@ -27,6 +27,7 @@ void test()
     assert(!safeDeposit.add(account, user, "test\\"));
 
     // Test sauvegarde des données
+    assert(safeDeposit.add("Facebook", "Bylal", "byby123") == true);
     safeDeposit.~Keepass();
     std::ifstream file(fileName, std::ios::in);
     assert(file.is_open());
@@ -35,7 +36,7 @@ void test()
     size_t fileSize = file.tellg();
     file.seekg(0, file.beg);
 
-    assert(fileSize == 32);
+    assert(fileSize == 56);
 
     std::string content;
     std::getline(file, content);

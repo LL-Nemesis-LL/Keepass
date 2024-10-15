@@ -21,13 +21,9 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
         {
             break;
         }
-        size_t passwordIndex = content.find('\\', userIndex) + 1;
+        AccountEntries accountDecode = this->decode(content);
 
-        std::string account = content.substr(0, userIndex - 1);
-        std::string user = content.substr(userIndex, passwordIndex - userIndex - 1);
-        std::string password = content.substr(passwordIndex, content.size() - passwordIndex);
-
-        this->add(account, user, password);
+        this->add(accountDecode.account, accountDecode.user, accountDecode.password);
     }
     file.close();
 }
@@ -72,13 +68,32 @@ std::map<std::string, PassEntry>::iterator Keepass::get(const std::string &accou
     return it;
 }
 
+std::string Keepass::encode(std::map<std::string, PassEntry>::iterator &it)
+{
+    std::stringstream accountEncode;
+    accountEncode << it->first << '\\' << it->second.user << '\\' << it->second.password << '\n';
+    return accountEncode.str();
+}
+
+AccountEntries Keepass::decode(std::string accountEncode)
+{
+    AccountEntries entries;
+    size_t userIndex = accountEncode.find('\\') + 1;
+    size_t passwordIndex = accountEncode.find('\\', userIndex) + 1;
+
+    entries.account = accountEncode.substr(0, userIndex - 1);
+    entries.user = accountEncode.substr(userIndex, passwordIndex - userIndex - 1);
+    entries.password = accountEncode.substr(passwordIndex, accountEncode.size() - passwordIndex);
+    return entries;
+}
+
 std::stringstream Keepass::formatForSave()
 {
     std::stringstream saveDeposit;
     std::map<std::string, PassEntry>::iterator it;
     for (it = std::begin(this->safeDepositIdentifier); it != std::end(this->safeDepositIdentifier); ++it)
     {
-        saveDeposit << it->first << '\\' << it->second.user << '\\' << it->second.password << '\n';
+        saveDeposit << this->encode(it);
     }
     return saveDeposit;
 }

@@ -22,6 +22,12 @@ struct PassEntry
     std::string user;
     std::string password;
 };
+struct AccountEntries
+{
+    std::string account;
+    std::string user;
+    std::string password;
+};
 class Keepass
 {
 
@@ -36,6 +42,8 @@ private:
     std::string _fileSaveName;
     enum Incorrect checkEntry(const std::string &account, const std::string &user, const std::string &password);
     std::map<std::string, PassEntry> safeDepositIdentifier;
+    std::string encode(std::map<std::string, PassEntry>::iterator &it);
+    AccountEntries decode(std::string content);
     std::stringstream formatForSave();
 };
 
