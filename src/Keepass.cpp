@@ -12,6 +12,7 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
         return;
     }
     int i = 0;
+    std::cout << "Debut de la restauration\n\n";
     while (!file.eof())
     {
         std::string accountEncrypt;
@@ -27,6 +28,7 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
 
         this->add(accountDecode.platform, accountDecode.ID.username, accountDecode.ID.password);
     }
+    std::cout << "fin de la restauration\n\n";
     file.close();
 }
 

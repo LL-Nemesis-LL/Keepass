@@ -565,7 +565,12 @@ const std::string EasyAES::decrypt(const std::string &cipher, const std::string 
   // QUITE UNSAFE: password is padded/truncated to match 128 bits
   unsigned char ckey[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}; // key example
   std::memcpy(ckey, key.c_str(), 16);
-
+  std::cout << "ckey : ";
+  for (int i = 0; i < 16; i++)
+  {
+    std::cout << ckey[i] << ", ";
+  }
+  std::cout << std::endl;
   unsigned char *decipher = aes.DecryptECB(plain, dataLen * sizeof(unsigned char), ckey);
 
   unsigned char paddingLength = decipher[dataLen - 1];
