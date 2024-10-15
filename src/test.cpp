@@ -9,16 +9,16 @@ void test()
 
     std::string fileName = "test.txt";
     Keepass safeDeposit(fileName);
-    const std::string account = "Google";
+    const std::string platform = "Google";
     const std::string user = "Marc-Antoine";
     const std::string password = "Tetris123@";
 
     // Test d'ajout
-    assert(safeDeposit.add(account, user, password) == true);
+    assert(safeDeposit.add(platform, user, password) == true);
     std::map<std::string, IDEntries>::iterator it;
-    it = safeDeposit.get(account);
+    it = safeDeposit.get(platform);
 
-    assert(it->first.compare(account) == 0);
+    assert(it->first.compare(platform) == 0);
     assert(it->second.username.compare(user) == 0);
     assert(it->second.password.compare(password) == 0);
 
@@ -26,8 +26,8 @@ void test()
     std::string badEntry("test");
     badEntry.push_back(sepEntries);
     assert(!safeDeposit.add(badEntry, user, password));
-    assert(!safeDeposit.add(account, badEntry, password));
-    assert(!safeDeposit.add(account, user, badEntry));
+    assert(!safeDeposit.add(platform, badEntry, password));
+    assert(!safeDeposit.add(platform, user, badEntry));
     // Test sauvegarde des données
     assert(safeDeposit.add("Facebook", "Bylal", "byby123") == true);
     safeDeposit.~Keepass();
@@ -45,11 +45,16 @@ void test()
     // Test restauration et de déchirement
     Keepass safeDepositRestauration(fileName);
 
-    it = safeDepositRestauration.get(account);
+    it = safeDepositRestauration.get(platform);
 
-    assert(it->first.compare(account) == 0);
+    assert(it->first.compare(platform) == 0);
     assert(it->second.username.compare(user) == 0);
     assert(it->second.password.compare(password) == 0);
+
+    // Test de la méthode "exist"
+
+    assert(safeDepositRestauration.exists(platform) == true);
+    assert(safeDepositRestauration.exists("aleatoire") == false);
 
     std::cout << "Test ok" << std::endl;
 }

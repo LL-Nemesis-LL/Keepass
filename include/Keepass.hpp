@@ -38,6 +38,7 @@ public:
     Keepass(const std::string &fileSaveName);
     bool add(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries>::iterator get(const std::string &plateform);
+    bool exists(const std::string &platform);
     ~Keepass();
 
 private:

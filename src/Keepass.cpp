@@ -45,6 +45,19 @@ bool Keepass::add(const std::string &platform, const std::string &username, cons
     return true;
 }
 
+bool Keepass::exists(const std::string &platform)
+{
+    std::map<std::string, IDEntries>::iterator It;
+    for (It = std::begin(this->safeDepositAccount); It != this->safeDepositAccount.end(); ++It)
+    {
+        if (platform.compare(It->first) == 0)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 enum Incorrect Keepass::checkEntry(const std::string &platform, const std::string &username, const std::string &password)
 {
     bool checkPlatform = platform.find(sepEntries) == std::string::npos;
