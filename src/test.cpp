@@ -14,11 +14,11 @@ void test()
 
     // Test d'ajout
     assert(safeDeposit.add(account, user, password) == true);
-    std::map<std::string, PassEntry>::iterator it;
+    std::map<std::string, IDEntries>::iterator it;
     it = safeDeposit.get(account);
 
     assert(it->first.compare(account) == 0);
-    assert(it->second.user.compare(user) == 0);
+    assert(it->second.username.compare(user) == 0);
     assert(it->second.password.compare(password) == 0);
 
     // Test de la politique des valeurs d'entrées
@@ -46,7 +46,7 @@ void test()
     it = safeDepositRestauration.get(account);
 
     assert(it->first.compare(account) == 0);
-    assert(it->second.user.compare(user) == 0);
+    assert(it->second.username.compare(user) == 0);
     assert(it->second.password.compare(password) == 0);
 
     std::cout << "Test ok" << std::endl;

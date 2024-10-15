@@ -8,24 +8,24 @@
 enum class Incorrect
 {
     Nothing,
-    Account,
+    Plateform,
     User,
     Password,
-    AccountUser,
+    PlateformUser,
     UserPassword,
     PasswordAccout,
     All
 };
 
-struct PassEntry
+struct IDEntries
 {
-    std::string user;
+    std::string username;
     std::string password;
 };
 struct AccountEntries
 {
-    std::string account;
-    std::string user;
+    std::string platform;
+    std::string username;
     std::string password;
 };
 class Keepass
@@ -34,15 +34,15 @@ class Keepass
 public:
     Keepass() = delete;
     Keepass(const std::string &fileSaveName);
-    bool add(const std::string &account, const std::string &user, const std::string &password);
-    std::map<std::string, PassEntry>::iterator get(const std::string &account);
+    bool add(const std::string &platform, const std::string &username, const std::string &password);
+    std::map<std::string, IDEntries>::iterator get(const std::string &plateform);
     ~Keepass();
 
 private:
     std::string _fileSaveName;
-    enum Incorrect checkEntry(const std::string &account, const std::string &user, const std::string &password);
-    std::map<std::string, PassEntry> safeDepositIdentifier;
-    std::string encode(std::map<std::string, PassEntry>::iterator &it);
+    enum Incorrect checkEntry(const std::string &platform, const std::string &username, const std::string &password);
+    std::map<std::string, IDEntries> safeDepositAccount;
+    std::string encode(std::map<std::string, IDEntries>::iterator &it);
     AccountEntries decode(std::string content);
     std::stringstream formatForSave();
 };
