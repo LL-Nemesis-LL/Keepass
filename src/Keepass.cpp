@@ -14,6 +14,7 @@ enum StateSave Keepass::open(const std::string &fileName, const std::string &key
     // Assure que le fichier est ouvert
     if (!file.is_open())
     {
+        file.close();
         return StateSave::Created;
     }
 
