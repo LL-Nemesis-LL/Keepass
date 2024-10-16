@@ -3,6 +3,7 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <memory>
 
 Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
 {
@@ -17,12 +18,12 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
     file.seekg(0, file.beg);
 
     // récupérer toutes les données
-    char fileContent[fileSaveSize + 1];
-    file.read(fileContent, fileSaveSize);
+    std::unique_ptr<char[]> fileContent = std::make_unique<char[]>(fileSaveSize + 1);
+    file.read(fileContent.get(), fileSaveSize);
 
     //  déchiffrer les données
     std::stringstream accountData;
-    accountData << this->aes.decrypt(fileContent, this->_key);
+    accountData << this->aes.decrypt(fileContent.get(), this->_key);
 
     std::string accountEncode;
     while (std::getline(accountData, accountEncode))

@@ -6,7 +6,6 @@
 
 void test()
 {
-
     std::string fileName = "test.txt";
     Keepass safeDeposit(fileName);
     const std::string platform = "Google";
