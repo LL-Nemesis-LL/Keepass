@@ -19,6 +19,13 @@ enum class Incorrect
     PasswordAccout,
     All
 };
+enum class StateSave
+{
+    Restored,
+    Created,
+    Invalid,
+    Error
+};
 
 struct IDEntries
 {
@@ -34,8 +41,7 @@ class Keepass
 {
 
 public:
-    Keepass() = delete;
-    Keepass(const std::string &fileSaveName);
+    enum StateSave open(const std::string &fileName, const std::string &key);
     bool add(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries>::iterator get(const std::string &plateform);
     bool exists(const std::string &platform);
@@ -44,7 +50,8 @@ public:
 
 private:
     std::string _fileSaveName;
-    std::string _key = "test";
+    std::string _key;
+    bool restore(std::ifstream &file, const size_t fileSize);
     enum Incorrect checkEntry(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries> safeDepositAccount;
     std::string encode(std::map<std::string, IDEntries>::iterator &it);

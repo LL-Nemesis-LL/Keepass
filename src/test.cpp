@@ -8,7 +8,10 @@
 void test()
 {
     std::string fileName = "test.txt";
-    std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>(fileName);
+    std::string key = "test";
+    std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>();
+    assert(safeDeposit->open(fileName, key) == StateSave::Created);
+
     const std::string platform = "Google";
     const std::string user = "Marc-Antoine";
     const std::string password = "Tetris123@";
@@ -43,7 +46,8 @@ void test()
     std::getline(file, content);
 
     // Test restauration et de déchirement
-    Keepass safeDepositRestauration(fileName);
+    Keepass safeDepositRestauration;
+    assert(safeDepositRestauration.open(fileName, key) == StateSave::Restored);
 
     it = safeDepositRestauration.get(platform);
 

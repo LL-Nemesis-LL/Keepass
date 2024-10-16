@@ -5,26 +5,55 @@
 #include <sstream>
 #include <memory>
 
-Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
+enum StateSave Keepass::open(const std::string &fileName, const std::string &key)
 {
-    std::ifstream file(this->_fileSaveName, std::ios::in | std::ios::binary);
+    this->_fileSaveName = fileName;
+    this->_key = key;
+    std::ifstream file(fileName, std::ios::in | std::ios::binary);
+
+    // Assure que le fichier est ouvert
     if (!file.is_open())
     {
-        return;
+        return StateSave::Created;
     }
-    // déterminer la taile du file
+
+    // Récupération de la taille du fichier
     file.seekg(0, file.end);
-    size_t fileSaveSize = file.tellg();
+    size_t fileSize = file.tellg();
     file.seekg(0, file.beg);
 
-    // récupérer toutes les données
-    std::unique_ptr<char[]> fileContent = std::make_unique<char[]>(fileSaveSize + 1);
-    file.read(fileContent.get(), fileSaveSize);
+    if (fileSize == 0)
+    {
+        file.close();
+        return StateSave::Created;
+    }
+    if (this->restore(file, fileSize))
+    {
+        return StateSave::Restored;
+    }
+    return StateSave::Invalid;
+}
 
-    //  déchiffrer les données
+bool Keepass::restore(std::ifstream &file, const size_t fileSize)
+{
+    // récupération des données
+    std::unique_ptr<char[]> fileContent = std::make_unique<char[]>(fileSize + 1);
+    file.read(fileContent.get(), fileSize);
+
+    //  déchiffrement des données
     std::stringstream accountData;
-    accountData << this->aes.decrypt(fileContent.get(), this->_key);
+    try
+    {
+        accountData << this->aes.decrypt(fileContent.get(), this->_key);
+    }
+    catch (std::invalid_argument const &erreur)
+    {
+        file.close();
+        std::cerr << "Erreur à la restoration" << erreur.what();
+        return false;
+    }
 
+    // Restauration des données
     std::string accountEncode;
     while (std::getline(accountData, accountEncode))
     {
@@ -32,6 +61,7 @@ Keepass::Keepass(const std::string &fileSaveName) : _fileSaveName(fileSaveName)
         this->add(accountDecode.platform, accountDecode.ID.username, accountDecode.ID.password);
     }
     file.close();
+    return true;
 }
 
 bool Keepass::add(const std::string &platform, const std::string &username, const std::string &password)
