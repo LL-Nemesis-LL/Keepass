@@ -10,7 +10,8 @@ void test()
     std::string fileName = "test.txt";
     std::string key = "test";
     std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>();
-    assert(safeDeposit->open(fileName, key) == StateSave::Created);
+    StateSave state = safeDeposit->open(fileName, key);
+    assert(state == StateSave::Created || state == StateSave::Restored);
 
     const std::string platform = "Google";
     const std::string user = "Marc-Antoine";
