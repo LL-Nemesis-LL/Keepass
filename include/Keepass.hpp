@@ -45,6 +45,7 @@ class Keepass
 {
 
 public:
+    std::string generatePassword();
     enum StateSave checkKey(const std::string &key);
     enum StateSave open(const std::string &fileName, const std::string &key);
     bool add(const std::string &platform, const std::string &username, const std::string &password);
