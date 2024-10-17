@@ -7,7 +7,9 @@
 
 void test()
 {
+
     std::string fileName = "test.txt";
+
     std::string key = "jgvhhfg12";
     std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>();
     StateSave state = safeDeposit->open(fileName, key);
@@ -48,7 +50,17 @@ void test()
 
     // Test vérification de mot de passe
     Keepass safeDepositRestauration;
+
     std::string fileNameCheckPassword = "test2.txt";
+    std::ifstream file2(fileNameCheckPassword);
+    if (file2.is_open() == 1)
+    {
+        std::cerr << "\nPour le bon deroulement du test,\n";
+        std::cerr << "Le fichier : '" << fileNameCheckPassword << "' doit etre supprime\n\n";
+        file.close();
+        assert(0 == 1);
+    }
+    file.close();
     assert(safeDepositRestauration.open(fileNameCheckPassword, "little") == StateSave::TooShort);
     assert(safeDepositRestauration.open(fileNameCheckPassword, "password too long") == StateSave::TooLong);
     assert(safeDepositRestauration.open(fileNameCheckPassword, "qwertyuiop") == StateSave::TooEasy);

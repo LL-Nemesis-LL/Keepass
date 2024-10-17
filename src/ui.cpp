@@ -122,7 +122,7 @@ void ui()
             }
             else
             {
-                std::cout << "\nLa plateforme " << platform << " n'extiste pas";
+                std::cout << "\nLa plateforme " << platform << " n'extiste pas\n\n";
             }
         }
     }
