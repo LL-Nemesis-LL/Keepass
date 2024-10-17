@@ -5,17 +5,60 @@
 #include <sstream>
 #include <memory>
 
+enum StateSave Keepass::checkKey(const std::string &key)
+{
+    if (key.size() > 16)
+    {
+        return StateSave::TooLong;
+    }
+    if (key.size() < 8)
+    {
+        return StateSave::TooShort;
+    }
+    // recherche de la clé dans un dictionnaire
+    std::ifstream dictionary("ressource/10-million-password-list-top-100000.txt");
+    // taille du fichier
+    dictionary.seekg(0, dictionary.end);
+    size_t dictionarySize = dictionary.tellg();
+    dictionary.seekg(0, dictionary.beg);
+
+    // Lecture
+    std::unique_ptr<char[]> dictionaryKey_ptr = std::make_unique<char[]>(dictionarySize);
+    dictionary.read(dictionaryKey_ptr.get(), dictionarySize);
+    std::stringstream dictionaryKey;
+    dictionaryKey << dictionaryKey_ptr.get();
+
+    // Test de comparaison
+    std::string word;
+    while (std::getline(dictionaryKey, word))
+    {
+        if (key.compare(word) == 0)
+        {
+            return StateSave::TooEasy;
+        }
+    }
+    return StateSave::IsGood;
+}
+
 enum StateSave Keepass::open(const std::string &fileName, const std::string &key)
 {
     this->_fileSaveName = fileName;
     this->_key = key;
     std::ifstream file(fileName, std::ios::in | std::ios::binary);
+    enum StateSave stateKey = this->checkKey(key);
 
     // Assure que le fichier est ouvert
     if (!file.is_open())
     {
         file.close();
-        return StateSave::Created;
+        if (stateKey == StateSave::IsGood)
+        {
+            return StateSave::Created;
+        }
+        else
+        {
+            return stateKey;
+        }
     }
 
     // Récupération de la taille du fichier
@@ -26,7 +69,14 @@ enum StateSave Keepass::open(const std::string &fileName, const std::string &key
     if (fileSize == 0)
     {
         file.close();
-        return StateSave::Created;
+        if (stateKey == StateSave::IsGood)
+        {
+            return StateSave::Created;
+        }
+        else
+        {
+            return stateKey;
+        }
     }
     if (this->restore(file, fileSize))
     {

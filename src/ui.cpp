@@ -47,6 +47,21 @@ void ui()
     {
         std::cout << "\nVotre sauvegarde a ete restaure\n\n";
     }
+    if (state == StateSave::TooShort)
+    {
+        std::cout << "\nVotre mot de passe est trop court (8 caracteres minimum)\n\n";
+        return;
+    }
+    if (state == StateSave::TooLong)
+    {
+        std::cout << "\nVotre mot de passe est trop long (16 caracteres maximum)\n\n";
+        return;
+    }
+    if (state == StateSave::TooEasy)
+    {
+        std::cout << "\nVotre mot de passe est trop facile\n\n";
+        return;
+    }
     std::string command, platform, username, password;
     std::map<std::string, IDEntries>::iterator it;
     while (true)

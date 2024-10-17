@@ -24,7 +24,11 @@ enum class StateSave
     Restored,
     Created,
     Invalid,
-    Error
+    Error,
+    TooShort,
+    TooLong,
+    TooEasy,
+    IsGood
 };
 
 struct IDEntries
@@ -41,6 +45,7 @@ class Keepass
 {
 
 public:
+    enum StateSave checkKey(const std::string &key);
     enum StateSave open(const std::string &fileName, const std::string &key);
     bool add(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries>::iterator get(const std::string &plateform);
