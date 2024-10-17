@@ -8,9 +8,7 @@ std::string getFile()
 {
     std::cout << "Entrez le nom de la sauvegarde ou du nouveau fichier : ";
     std::string fileName;
-    std::cin >> fileName;
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, fileName);
     return fileName;
 }
 
@@ -18,9 +16,7 @@ std::string getKey()
 {
     std::cout << "Renseignez votre mot de passe : ";
     std::string key;
-    std::cin >> key;
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, key);
     return key;
 }
 

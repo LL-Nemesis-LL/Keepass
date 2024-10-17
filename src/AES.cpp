@@ -559,7 +559,7 @@ const std::string EasyAES::encrypt(const std::string &text, const std::string &k
 
 const std::string EasyAES::decrypt(const std::string &cipher, const std::string &key)
 {
-  const int keyLen = key.size() % 16;
+  const int keyLen = key.size();
   unsigned int dataLen = cipher.size();
   unsigned char *plain = (unsigned char *)cipher.c_str();
 

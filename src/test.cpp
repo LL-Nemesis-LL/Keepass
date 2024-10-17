@@ -8,7 +8,7 @@
 void test()
 {
     std::string fileName = "test.txt";
-    std::string key = "test";
+    std::string key = "jgvhhfg12";
     std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>();
     StateSave state = safeDeposit->open(fileName, key);
     assert(state == StateSave::Created || state == StateSave::Restored);
@@ -46,8 +46,14 @@ void test()
     std::string content;
     std::getline(file, content);
 
-    // Test restauration et de déchirement
+    // Test vérification de mot de passe
     Keepass safeDepositRestauration;
+    std::string fileNameCheckPassword = "test2.txt";
+    assert(safeDepositRestauration.open(fileNameCheckPassword, "little") == StateSave::TooShort);
+    assert(safeDepositRestauration.open(fileNameCheckPassword, "password too long") == StateSave::TooLong);
+    assert(safeDepositRestauration.open(fileNameCheckPassword, "qwertyuiop") == StateSave::TooEasy);
+
+    // Test restauration et de déchirement
     assert(safeDepositRestauration.open(fileName, key) == StateSave::Restored);
 
     it = safeDepositRestauration.get(platform);

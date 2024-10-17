@@ -42,12 +42,13 @@ enum StateSave Keepass::checkKey(const std::string &key)
 
 enum StateSave Keepass::open(const std::string &fileName, const std::string &key)
 {
+    this->stateSave = StateSave::Error;
     this->_fileSaveName = fileName;
     this->_key = key;
     std::ifstream file(fileName, std::ios::in | std::ios::binary);
     enum StateSave stateKey = this->checkKey(key);
 
-    // Assure que le fichier est ouvert
+    // Regarde si le fichier existe pas
     if (!file.is_open())
     {
         file.close();
@@ -204,6 +205,8 @@ std::string Keepass::formatForSave()
 {
     std::stringstream saveDeposit;
     std::map<std::string, IDEntries>::iterator it;
+
+    // Si safeDeposit accout est vide retourner un chaîne de caractère vide
     if (it == std::end(this->safeDepositAccount))
     {
         return "";
@@ -225,11 +228,10 @@ Keepass::~Keepass()
     std::string saveDeposit = this->formatForSave();
 
     // Si rien à sauvegarder ne rien faire
-    if (saveDeposit.size() == 0)
+    if (saveDeposit.size() == 0 && this->stateSave == StateSave::Created)
     {
         return;
     }
-    std::cout << "contenur du fichier : " << saveDeposit;
     std::string dataEncrypt = this->aes.encrypt(saveDeposit, this->_key);
     std::ofstream file(this->_fileSaveName, std::ios::trunc);
     file << dataEncrypt;
