@@ -53,6 +53,7 @@ enum StateSave Keepass::open(const std::string &fileName, const std::string &key
         file.close();
         if (stateKey == StateSave::IsGood)
         {
+            this->stateSave = StateSave::Created;
             return StateSave::Created;
         }
         else
@@ -71,6 +72,7 @@ enum StateSave Keepass::open(const std::string &fileName, const std::string &key
         file.close();
         if (stateKey == StateSave::IsGood)
         {
+            this->stateSave = StateSave::Created;
             return StateSave::Created;
         }
         else
@@ -80,6 +82,7 @@ enum StateSave Keepass::open(const std::string &fileName, const std::string &key
     }
     if (this->restore(file, fileSize))
     {
+        this->stateSave = StateSave::Restored;
         return StateSave::Restored;
     }
     return StateSave::Invalid;
@@ -197,22 +200,38 @@ AccountEntries Keepass::decode(std::string accountEncode)
     return entries;
 }
 
-std::stringstream Keepass::formatForSave()
+std::string Keepass::formatForSave()
 {
     std::stringstream saveDeposit;
     std::map<std::string, IDEntries>::iterator it;
+    if (it == std::end(this->safeDepositAccount))
+    {
+        return "";
+    }
     for (it = std::begin(this->safeDepositAccount); it != std::end(this->safeDepositAccount); ++it)
     {
         saveDeposit << this->encode(it);
     }
-    return saveDeposit;
+    return saveDeposit.str();
 }
 
 Keepass::~Keepass()
 {
-    std::string saveDeposit = this->formatForSave().str();
+    // Si le fichier est ni créer ou ni restaurer ne rien faire
+    if (!(this->stateSave == StateSave::Created || this->stateSave == StateSave::Restored))
+    {
+        return;
+    }
+    std::string saveDeposit = this->formatForSave();
+
+    // Si rien à sauvegarder ne rien faire
+    if (saveDeposit.size() == 0)
+    {
+        return;
+    }
+    std::cout << "contenur du fichier : " << saveDeposit;
     std::string dataEncrypt = this->aes.encrypt(saveDeposit, this->_key);
-    std::ofstream file(this->_fileSaveName, std::ios::out | std::ios::trunc);
+    std::ofstream file(this->_fileSaveName, std::ios::trunc);
     file << dataEncrypt;
     file.close();
 }

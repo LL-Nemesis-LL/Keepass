@@ -56,13 +56,14 @@ public:
 private:
     std::string _fileSaveName;
     std::string _key;
+    StateSave stateSave = StateSave::Error;
     bool restore(std::ifstream &file, const size_t fileSize);
     enum Incorrect checkEntry(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries> safeDepositAccount;
     std::string encode(std::map<std::string, IDEntries>::iterator &it);
     AccountEntries decode(std::string content);
     EasyAES aes;
-    std::stringstream formatForSave();
+    std::string formatForSave();
 };
 
 #endif
