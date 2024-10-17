@@ -50,7 +50,6 @@ bool Keepass::restore(std::ifstream &file, const size_t fileSize)
     catch (std::invalid_argument const &erreur)
     {
         file.close();
-        std::cerr << "Erreur à la restoration" << erreur.what();
         return false;
     }
 
