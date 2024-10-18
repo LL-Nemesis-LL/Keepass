@@ -223,14 +223,14 @@ AccountEntries Keepass::decode(std::string accountEncode)
 
 std::string Keepass::formatForSave()
 {
-    std::stringstream saveDeposit;
-    std::map<std::string, IDEntries>::iterator it;
-
     // Si safeDeposit accout est vide retourner un chaîne de caractère vide
-    if (it == std::end(this->safeDepositAccount))
+    if (std::begin(this->safeDepositAccount) == std::end(this->safeDepositAccount))
     {
         return "";
     }
+
+    std::stringstream saveDeposit;
+    std::map<std::string, IDEntries>::iterator it;
     for (it = std::begin(this->safeDepositAccount); it != std::end(this->safeDepositAccount); ++it)
     {
         saveDeposit << this->encode(it);
