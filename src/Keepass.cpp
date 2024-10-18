@@ -43,7 +43,7 @@ enum StateSave Keepass::checkKey(const std::string &key)
     dictionary.seekg(0, dictionary.beg);
 
     // Lecture
-    std::unique_ptr<char[]> dictionaryKey_ptr = std::make_unique<char[]>(dictionarySize);
+    std::unique_ptr<char[]> dictionaryKey_ptr = std::make_unique<char[]>(dictionarySize + 1);
     dictionary.read(dictionaryKey_ptr.get(), dictionarySize);
     std::stringstream dictionaryKey;
     dictionaryKey << dictionaryKey_ptr.get();
