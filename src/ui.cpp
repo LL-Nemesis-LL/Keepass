@@ -43,7 +43,7 @@ void ui()
 {
     std::cout << "\nBienvenue dans votre gestionnaire de mot de passe\n\n";
     std::string fileName = getFile();
-    std::cout << "Souhaite vous utilise le generateur de mot de passe" << std::endl;
+    std::cout << "\nSouhaite vous utilisez le generateur de mot de passe ?" << std::endl;
     std::cout << "Si oui tapez 'oui' ou tapez sur une autre touche : ";
     std::string rep;
     std::getline(std::cin, rep);
@@ -54,36 +54,35 @@ void ui()
     std::string key = getKey();
     Keepass safeDeposit;
     StateSave state = safeDeposit.open(fileName, key);
-    while (state == StateSave::Invalid)
-    {
-        std::cout << "\nLe mot de passe de la sauvegarde que vous tentez d'ouvrir,\nn'est pas le bon.\n\n";
-        std::string fileName = getFile();
-        std::string key = getKey();
-        state = safeDeposit.open(fileName, key);
-    }
-    if (state == StateSave::Created)
-    {
-        std::cout << "\nVotre fichier sera cree une fois le programme fermer\n\n";
-    }
 
-    if (state == StateSave::Restored)
+    switch (state)
     {
+    case StateSave::Invalid:
+        while (state == StateSave::Invalid)
+        {
+            std::cout << "\nLe mot de passe de la sauvegarde que vous tentez d'ouvrir,\nn'est pas le bon.\n\n";
+            std::string fileName = getFile();
+            std::string key = getKey();
+            state = safeDeposit.open(fileName, key);
+        }
+        break;
+    case StateSave::Created:
+        std::cout << "\nVotre fichier sera cree une fois le programme fermer\n\n";
+        break;
+    case StateSave::Restored:
         std::cout << "\nVotre sauvegarde a ete restaure\n\n";
-    }
-    if (state == StateSave::TooShort)
-    {
+        break;
+    case StateSave::TooShort:
         std::cout << "\nVotre mot de passe est trop court (8 caracteres minimum)\n\n";
-        return;
-    }
-    if (state == StateSave::TooLong)
-    {
+        break;
+    case StateSave::TooLong:
         std::cout << "\nVotre mot de passe est trop long (16 caracteres maximum)\n\n";
-        return;
-    }
-    if (state == StateSave::TooEasy)
-    {
+        break;
+    case StateSave::TooEasy:
         std::cout << "\nVotre mot de passe est trop facile\n\n";
-        return;
+        break;
+    default:
+        break;
     }
     std::string command, platform, username, password;
     std::map<std::string, IDEntries>::iterator it;
