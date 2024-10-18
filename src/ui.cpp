@@ -19,6 +19,11 @@ std::string getKey()
     std::getline(std::cin, key);
     return key;
 }
+bool isFileExist(const std::string &fileName)
+{
+    std::ifstream file(fileName);
+    return file.is_open();
+}
 
 std::string generatePassword()
 {
@@ -43,14 +48,21 @@ void ui()
 {
     std::cout << "\nBienvenue dans votre gestionnaire de mot de passe\n\n";
     std::string fileName = getFile();
-    std::cout << "\nSouhaite vous utilisez le generateur de mot de passe ?" << std::endl;
-    std::cout << "Si oui tapez 'oui' ou tapez sur une autre touche : ";
-    std::string rep;
-    std::getline(std::cin, rep);
-    if (rep.compare("oui") == 0)
+    if (!isFileExist(fileName))
     {
-        std::cout << "Mot de passe suggérer : " << generatePassword() << std::endl;
+        std::cout << std::endl
+                  << "Souhaite vous utilisez le generateur de mot de passe ?" << std::endl;
+        std::cout << "Si oui tapez 'oui' ou tapez sur une autre touche : ";
+        std::string rep;
+        std::getline(std::cin, rep);
+        if (rep.compare("oui") == 0)
+        {
+            std::cout << std::endl
+                      << "Mot de passe suggéré : " << generatePassword() << std::endl
+                      << std::endl;
+        }
     }
+
     std::string key = getKey();
     Keepass safeDeposit;
     StateSave state = safeDeposit.open(fileName, key);
