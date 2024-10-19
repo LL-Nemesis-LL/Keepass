@@ -87,6 +87,7 @@ enum StateSave Keepass::open(const std::string &fileName, const std::string &key
     file.seekg(0, file.end);
     size_t fileSize = file.tellg();
     file.seekg(0, file.beg);
+    std::cout << fileSize << std::endl;
 
     if (fileSize == 0)
     {
@@ -119,7 +120,7 @@ bool Keepass::restore(std::ifstream &file, const size_t fileSize)
     std::stringstream accountData;
     try
     {
-        accountData << this->aes.decrypt(fileContent.get(), this->_key);
+        accountData << this->aes.decrypt(fileContent.get(), fileSize, this->_key);
     }
     catch (std::invalid_argument const &erreur)
     {

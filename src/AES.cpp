@@ -40,7 +40,7 @@ unsigned char *AES::DecryptECB(const unsigned char in[], unsigned int inLen,
                                const unsigned char key[])
 {
   CheckLength(inLen);
-  unsigned char *out = new unsigned char[inLen];
+  unsigned char *out = new unsigned char[inLen + 1];
   unsigned char *roundKeys = new unsigned char[4 * Nb * (Nr + 1)];
   KeyExpansion(key, roundKeys);
   for (unsigned int i = 0; i < inLen; i += blockBytesLen)
@@ -540,7 +540,7 @@ const std::string EasyAES::encrypt(const std::string &text, const std::string &k
   unsigned int paddingLength = blockSize - (text.size() % blockSize);
   unsigned int paddedLen = text.size() + paddingLength;
 
-  unsigned char *plain = new unsigned char[paddedLen];
+  unsigned char *plain = new unsigned char[paddedLen + 1];
   std::memcpy(plain, text.c_str(), text.size());
 
   // Filling padding
@@ -557,15 +557,15 @@ const std::string EasyAES::encrypt(const std::string &text, const std::string &k
   return cipher_str;
 }
 
-const std::string EasyAES::decrypt(const std::string &cipher, const std::string &key)
+const std::string EasyAES::decrypt(const char *cipher, const size_t dataLen, const std::string &key)
 {
   const int keyLen = key.size();
-  unsigned int dataLen = cipher.size();
-  unsigned char *plain = (unsigned char *)cipher.c_str();
+  unsigned char *plain = (unsigned char *)cipher;
 
   // QUITE UNSAFE: password is padded/truncated to match 128 bits
   unsigned char ckey[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}; // key example
   std::memcpy(ckey, key.c_str(), keyLen);
+  std::cout << dataLen;
   unsigned char *decipher = aes.DecryptECB(plain, dataLen * sizeof(unsigned char), ckey);
   unsigned char paddingLength = decipher[dataLen - 1];
   // checking padding validity

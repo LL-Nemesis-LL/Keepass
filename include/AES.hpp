@@ -357,7 +357,7 @@ class EasyAES
 
 public:
     const std::string encrypt(const std::string &plain, const std::string &key);
-    const std::string decrypt(const std::string &plain, const std::string &key);
+    const std::string decrypt(const char *cipher, const size_t dataLen, const std::string &key);
 };
 
 #endif
