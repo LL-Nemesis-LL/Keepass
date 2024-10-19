@@ -46,12 +46,14 @@ std::string generatePassword()
 
 void ui()
 {
-    std::cout << "\nBienvenue dans votre gestionnaire de mot de passe\n\n";
+    std::cout << std::endl
+              << "Bienvenue dans votre gestionnaire de mot de passe" << std::endl
+              << std::endl;
     std::string fileName = getFile();
     if (!isFileExist(fileName))
     {
         std::cout << std::endl
-                  << "Souhaite vous utilisez le generateur de mot de passe ?" << std::endl;
+                  << "Souhaite vous utilisez le générateur de mot de passe ?" << std::endl;
         std::cout << "Si oui tapez 'oui' ou tapez sur une autre touche : ";
         std::string rep;
         std::getline(std::cin, rep);
@@ -72,26 +74,39 @@ void ui()
     case StateSave::Invalid:
         while (state == StateSave::Invalid)
         {
-            std::cout << "\nLe mot de passe de la sauvegarde que vous tentez d'ouvrir,\nn'est pas le bon.\n\n";
+            std::cout << std::endl
+                      << "Le mot de passe de la sauvegarde que vous tentez d'ouvrir," << std::endl
+                      << "n'est pas le bon." << std::endl
+                      << std::endl;
             std::string fileName = getFile();
             std::string key = getKey();
             state = safeDeposit.open(fileName, key);
         }
         break;
     case StateSave::Created:
-        std::cout << "\nVotre fichier sera cree une fois le programme fermer\n\n";
+        std::cout << std::endl
+                  << "Votre fichier sera créé une fois le programme fermer" << std::endl
+                  << std::endl;
         break;
     case StateSave::Restored:
-        std::cout << "\nVotre sauvegarde a ete restaure\n\n";
+        std::cout << std::endl
+                  << "Votre sauvegarde a été restauré" << std::endl
+                  << std::endl;
         break;
     case StateSave::TooShort:
-        std::cout << "\nVotre mot de passe est trop court (8 caracteres minimum)\n\n";
+        std::cout << std::endl
+                  << "Votre mot de passe est trop court (8 caracteres minimum)" << std::endl
+                  << std::endl;
         break;
     case StateSave::TooLong:
-        std::cout << "\nVotre mot de passe est trop long (16 caracteres maximum)\n\n";
+        std::cout << std::endl
+                  << "Votre mot de passe est trop long (16 caracteres maximum)" << std::endl
+                  << std::endl;
         break;
     case StateSave::TooEasy:
-        std::cout << "\nVotre mot de passe est trop facile\n\n";
+        std::cout << std::endl
+                  << "Votre mot de passe est trop facile" << std::endl
+                  << std::endl;
         break;
     default:
         break;
@@ -117,8 +132,8 @@ void ui()
             std::getline(std::cin, password);
             if (safeDeposit.exists(platform))
             {
-                std::cout << "la platform : " << platform << "existe déjà,\n";
-                std::cout << "Etes-vous sur de vouloir la modifie?\n";
+                std::cout << "la platform : " << platform << "existe déjà," << std::endl;
+                std::cout << "Etês-vous sur de vouloir la modifié?" << std::endl;
                 std::cout << "Sinon tapez 'non', si oui appuyer sur une touche : ";
                 std::getline(std::cin, command);
                 if (command == "non")
@@ -129,7 +144,7 @@ void ui()
             }
             if (safeDeposit.add(platform, username, password))
             {
-                std::cout << "Votre compte a bien ete cree" << std::endl;
+                std::cout << "Votre compte a bien été créé" << std::endl;
                 continue;
             }
             std::cout << "Une Erreur c'est produite" << std::endl;
@@ -141,13 +156,17 @@ void ui()
             if (safeDeposit.exists(platform))
             {
                 it = safeDeposit.get(platform);
-                std::cout << "\nPlateforme : " << it->first << std::endl;
+                std::cout << std::endl
+                          << "Plateforme : " << it->first << std::endl;
                 std::cout << "Nom utilisateur : " << it->second.username << std::endl;
-                std::cout << "Mot de passe : " << it->second.password << "\n\n";
+                std::cout << "Mot de passe : " << it->second.password << std::endl
+                          << std::endl;
             }
             else
             {
-                std::cout << "\nCette plateforme n'existe pas\n\n";
+                std::cout << std::endl
+                          << "Cette plateforme n'existe pas" << std::endl
+                          << std::endl;
             }
         }
         if (command == "R")
@@ -156,11 +175,15 @@ void ui()
             std::getline(std::cin, platform);
             if (safeDeposit.remove(platform))
             {
-                std::cout << "\nLa plateforme " << platform << " a bien ete supprime\n\n";
+                std::cout << std::endl
+                          << "La plateforme " << platform << " a bien été supprimé" << std::endl
+                          << std::endl;
             }
             else
             {
-                std::cout << "\nLa plateforme " << platform << " n'extiste pas\n\n";
+                std::cout << std::endl
+                          << "La plateforme " << platform << " n'extiste pas" << std::endl
+                          << std::endl;
             }
         }
     }
