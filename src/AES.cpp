@@ -557,15 +557,14 @@ const std::string EasyAES::encrypt(const std::string &text, const std::string &k
   return cipher_str;
 }
 
-const std::string EasyAES::decrypt(const char *cipher, const size_t dataLen, const std::string &key)
+const std::string EasyAES::decrypt(std::unique_ptr<char[]> cipher, const size_t dataLen, const std::string &key)
 {
   const int keyLen = key.size();
-  unsigned char *plain = (unsigned char *)cipher;
+  unsigned char *plain = (unsigned char *)cipher.get();
 
   // QUITE UNSAFE: password is padded/truncated to match 128 bits
   unsigned char ckey[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f}; // key example
   std::memcpy(ckey, key.c_str(), keyLen);
-  std::cout << dataLen;
   unsigned char *decipher = aes.DecryptECB(plain, dataLen * sizeof(unsigned char), ckey);
   unsigned char paddingLength = decipher[dataLen - 1];
   // checking padding validity

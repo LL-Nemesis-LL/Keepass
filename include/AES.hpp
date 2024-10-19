@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <memory>
 
 enum class AESKeyLength
 {
@@ -357,7 +358,7 @@ class EasyAES
 
 public:
     const std::string encrypt(const std::string &plain, const std::string &key);
-    const std::string decrypt(const char *cipher, const size_t dataLen, const std::string &key);
+    const std::string decrypt(std::unique_ptr<char[]> cipher, const size_t dataLen, const std::string &key);
 };
 
 #endif
