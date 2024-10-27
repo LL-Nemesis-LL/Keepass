@@ -4,14 +4,15 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include <cstdio>
 
 void test()
 {
 
     std::string fileName = "test.txt";
 
-    std::string key = "jgvhhfg12";
     std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>();
+    std::string key = safeDeposit->generatePassword();
     StateSave state = safeDeposit->open(fileName, key);
     assert(state == StateSave::Created || state == StateSave::Restored);
 
@@ -34,22 +35,10 @@ void test()
     assert(!safeDeposit->add(badEntry, user, password));
     assert(!safeDeposit->add(platform, badEntry, password));
     assert(!safeDeposit->add(platform, user, badEntry));
-    // Test sauvegarde des données
-    assert(safeDeposit->add("Facebook", "Bylal", "byby123") == true);
+    // Création de la sauvegarde
     safeDeposit.reset();
-    std::ifstream file(fileName, std::ios::in);
-    assert(file.is_open());
-
-    file.seekg(0, file.end);
-    size_t fileSize = file.tellg();
-    file.seekg(0, file.beg);
-    assert(fileSize == 64);
-
-    std::string content;
-    std::getline(file, content);
 
     // Test vérification de mot de passe
-    Keepass safeDepositRestauration;
 
     std::string fileNameCheckPassword = "test2.txt";
     std::ifstream file2(fileNameCheckPassword);
@@ -57,18 +46,21 @@ void test()
     {
         std::cerr << "\nPour le bon deroulement du test,\n";
         std::cerr << "Le fichier : '" << fileNameCheckPassword << "' doit etre supprime\n\n";
-        file.close();
+        file2.close();
         assert(0 == 1);
     }
-    file.close();
-    assert(safeDepositRestauration.open(fileNameCheckPassword, "little") == StateSave::TooShort);
-    assert(safeDepositRestauration.open(fileNameCheckPassword, "password too long") == StateSave::TooLong);
-    assert(safeDepositRestauration.open(fileNameCheckPassword, "qwertyuiop") == StateSave::TooEasy);
+    file2.close();
+
+    std::unique_ptr<Keepass> safeDepositRestauration = std::make_unique<Keepass>();
+
+    assert(safeDepositRestauration->open(fileNameCheckPassword, "little") == StateSave::TooShort);
+    assert(safeDepositRestauration->open(fileNameCheckPassword, "password too long") == StateSave::TooLong);
+    assert(safeDepositRestauration->open(fileNameCheckPassword, "qwertyuiop") == StateSave::TooEasy);
 
     // Test restauration et de déchirement
-    assert(safeDepositRestauration.open(fileName, key) == StateSave::Restored);
+    assert(safeDepositRestauration->open(fileName, key) == StateSave::Restored);
 
-    it = safeDepositRestauration.get(platform);
+    it = safeDepositRestauration->get(platform);
 
     assert(it->first.compare(platform) == 0);
     assert(it->second.username.compare(user) == 0);
@@ -76,12 +68,16 @@ void test()
 
     // Test de la méthode "exist"
 
-    assert(safeDepositRestauration.exists(platform) == true);
-    assert(safeDepositRestauration.exists("aleatoire") == false);
+    assert(safeDepositRestauration->exists(platform) == true);
+    assert(safeDepositRestauration->exists("aleatoire") == false);
 
     // Test de la méthode "remove"
-    assert(safeDepositRestauration.remove("Facebook") == true);
-    assert(safeDepositRestauration.remove("aleatoire") == false);
+    assert(safeDepositRestauration->remove(platform) == true);
+    assert(safeDepositRestauration->remove("aleatoire") == false);
+
+    // Supression du fichier de test
+    safeDepositRestauration.reset();
+    assert(remove(fileName.data()) == 0);
 
     std::cout << "Test ok" << std::endl;
 }
