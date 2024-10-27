@@ -535,7 +535,7 @@ std::vector<unsigned char> AES::DecryptCFB(std::vector<unsigned char> in,
 const std::string EasyAES::encrypt(const std::string &text, const std::string &key)
 {
   // text length multiple of 16 bytes
-  const int keyLen = key.size() % 16;
+  const int keyLen = key.size();
   const unsigned int blockSize = 16;
   unsigned int paddingLength = blockSize - (text.size() % blockSize);
   unsigned int paddedLen = text.size() + paddingLength;
