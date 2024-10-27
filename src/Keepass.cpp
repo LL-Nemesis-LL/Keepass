@@ -17,7 +17,7 @@ std::string Keepass::generatePassword()
     srand(time(NULL));
     std::string password;
     char character;
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < __maxSizePassword; i++)
     {
         character = letters[rand() % 68];
         password.push_back(character);
@@ -27,7 +27,7 @@ std::string Keepass::generatePassword()
 
 enum StateSave Keepass::checkKey(const std::string &key)
 {
-    if (key.size() > 16)
+    if (key.size() > __maxSizePassword)
     {
         return StateSave::TooLong;
     }

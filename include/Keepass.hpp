@@ -7,6 +7,7 @@
 #include "AES.hpp"
 
 const char sepEntries = '\\';
+const int __maxSizePassword{16};
 
 enum class Incorrect
 {
