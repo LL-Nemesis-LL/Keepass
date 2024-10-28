@@ -205,7 +205,7 @@ std::string Keepass::encode(std::map<std::string, IDEntries>::iterator &it)
 {
     std::stringstream accountEncode;
 
-    accountEncode << it->first << sepEntries << it->second.username << sepEntries << it->second.password << '\n';
+    accountEncode << it->first << sepEntries << it->second.username << sepEntries << it->second.password << std::endl;
     return accountEncode.str();
 }
 
@@ -253,7 +253,7 @@ Keepass::~Keepass()
         return;
     }
     std::string dataEncrypt = this->aes.encrypt(saveDeposit, this->_key);
-    std::ofstream file(this->_fileSaveName, std::ios::trunc);
+    std::ofstream file(this->_fileSaveName, std::ios::trunc | std::ios::binary);
     file << dataEncrypt;
     file.close();
 }
