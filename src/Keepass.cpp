@@ -5,6 +5,7 @@
 #include <sstream>
 #include <memory>
 #include <time.h>
+#include <openssl/evp.h>
 
 std::string Keepass::generatePassword()
 {
@@ -24,6 +25,49 @@ std::string Keepass::generatePassword()
     }
     return password;
 }
+char *sha256File(std::string &fileNameDictionary)
+{
+    std::ifstream fichier(fileNameDictionary, std::ios::binary);
+    constexpr int lenBlock = 255;
+    fichier.seekg(0, fichier.end);
+    size_t lenFichier = fichier.tellg();
+    fichier.seekg(0, fichier.beg);
+    int nbrBlock = lenFichier / lenBlock;
+
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    EVP_MD *sha256 = EVP_MD_fetch(NULL, "SHA256", NULL);
+    const int lenSha256 = EVP_MD_get_size(sha256);
+    EVP_DigestInit_ex(ctx, sha256, NULL);
+
+    unsigned char block[lenBlock];
+    for (int i = 0; i < nbrBlock; i++)
+    {
+        fichier.read(reinterpret_cast<char *>(block), lenBlock);
+        EVP_DigestUpdate(ctx, block, lenBlock);
+    }
+    int lenLastData = lenFichier % lenBlock;
+    unsigned char lastBlock[lenLastData];
+    if (lenLastData != 0)
+    {
+        fichier.read(reinterpret_cast<char *>(lastBlock), lenLastData);
+        EVP_DigestUpdate(ctx, lastBlock, lenLastData);
+    }
+    fichier.close();
+
+    std::unique_ptr<unsigned char[]> outdigest = std::make_unique<unsigned char[]>(lenSha256);
+    unsigned int len = 0;
+    EVP_DigestFinal_ex(ctx, outdigest.get(), &len);
+    char *hash = new char[sizeof(char) * ((lenSha256 * 2) + 1)];
+    for (int i = 0; i < lenSha256; i++)
+    {
+        sprintf(&hash[i * 2], "%02x", outdigest[i]);
+    }
+    hash[lenSha256 * 2] = '\0';
+    EVP_MD_CTX_free(ctx);
+    EVP_MD_free(sha256);
+
+    return hash;
+}
 
 enum StateSave Keepass::checkKey(const std::string &key)
 {
@@ -36,7 +80,19 @@ enum StateSave Keepass::checkKey(const std::string &key)
         return StateSave::TooShort;
     }
     // recherche de la clé dans un dictionnaire
-    std::ifstream dictionary("ressource/10-million-password-list-top-100000.txt");
+    std::string fileDictonaryName("ressource/10-million-password-list-top-100000.txt");
+    std::unique_ptr<char[]> hash(sha256File(fileDictonaryName));
+    std::string hashGot(hash.get());
+    constexpr char hashExcepted[] = "b0d9a2015610d68c80602a5fdd1212561e2844a9bb013db5a2bda81a5ff30ffd\0";
+    if (hashGot.compare(hashExcepted) != 0)
+    {
+        std::cout << "erreur sur l'intégriter du dictionnaire" << std::endl;
+    }
+    std::ifstream dictionary(fileDictonaryName);
+    if (!dictionary.is_open())
+    {
+        return StateSave::Invalid;
+    }
     // taille du fichier
     dictionary.seekg(0, dictionary.end);
     size_t dictionarySize = dictionary.tellg();
