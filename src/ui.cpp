@@ -3,6 +3,7 @@
 #include <fstream>
 #include <limits>
 #include <map>
+#include <time.h>
 
 std::string getFile()
 {
