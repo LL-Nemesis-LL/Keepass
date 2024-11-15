@@ -69,15 +69,15 @@ char *sha256File(std::string &fileNameDictionary)
     return hash;
 }
 
-enum StateSave Keepass::checkKey(const std::string &key)
+void Keepass::checkKey(const std::string &key)
 {
     if (key.size() > __maxSizePassword)
     {
-        return StateSave::TooLong;
+        throw std::invalid_argument("The password is too long");
     }
     if (key.size() < 8)
     {
-        return StateSave::TooShort;
+        throw std::invalid_argument("The password is too short");
     }
     // recherche de la clé dans un dictionnaire
     std::string fileDictonaryName("ressource/10-million-password-list-top-100000.txt");
@@ -86,12 +86,12 @@ enum StateSave Keepass::checkKey(const std::string &key)
     constexpr char hashExcepted[] = "b0d9a2015610d68c80602a5fdd1212561e2844a9bb013db5a2bda81a5ff30ffd\0";
     if (hashGot.compare(hashExcepted) != 0)
     {
-        std::cout << "erreur sur l'intégriter du dictionnaire" << std::endl;
+        throw std::invalid_argument("The file '10-million-password...' has been corrumped");
     }
     std::ifstream dictionary(fileDictonaryName);
     if (!dictionary.is_open())
     {
-        return StateSave::Invalid;
+        throw std::invalid_argument("The file '10-million-password...' isn't opened");
     }
     // taille du fichier
     dictionary.seekg(0, dictionary.end);
@@ -110,33 +110,29 @@ enum StateSave Keepass::checkKey(const std::string &key)
     {
         if (key.compare(word) == 0)
         {
-            return StateSave::TooEasy;
+            throw std::invalid_argument("The password is too easy");
         }
     }
-    return StateSave::IsGood;
+    return;
 }
 
-enum StateSave Keepass::open(const std::string &fileName, const std::string &key)
+void Keepass::open(const std::string &fileName, const std::string &key)
 {
+    // Check if the key respect the policy
+    this->_key = key;
+    this->checkKey(key);
+
     this->stateSave = StateSave::Error;
     this->_fileSaveName = fileName;
-    this->_key = key;
-    std::ifstream file(fileName, std::ios::in | std::ios::binary);
-    enum StateSave stateKey = this->checkKey(key);
+
+    std::ifstream file(fileName, std::ios::binary);
 
     // Regarde si le fichier existe pas
     if (!file.is_open())
     {
         file.close();
-        if (stateKey == StateSave::IsGood)
-        {
-            this->stateSave = StateSave::Created;
-            return StateSave::Created;
-        }
-        else
-        {
-            return stateKey;
-        }
+        this->stateSave = StateSave::Created;
+        return;
     }
 
     // Récupération de la taille du fichier
@@ -147,22 +143,13 @@ enum StateSave Keepass::open(const std::string &fileName, const std::string &key
     if (fileSize == 0)
     {
         file.close();
-        if (stateKey == StateSave::IsGood)
-        {
-            this->stateSave = StateSave::Created;
-            return StateSave::Created;
-        }
-        else
-        {
-            return stateKey;
-        }
+        this->stateSave = StateSave::Created;
+        return;
     }
-    if (this->restore(file, fileSize))
+    else
     {
-        this->stateSave = StateSave::Restored;
-        return StateSave::Restored;
+        this->restore(file, fileSize);
     }
-    return StateSave::Invalid;
 }
 
 bool Keepass::restore(std::ifstream &file, const size_t fileSize)
@@ -170,6 +157,7 @@ bool Keepass::restore(std::ifstream &file, const size_t fileSize)
     // récupération des données
     std::unique_ptr<char[]> fileContent = std::make_unique<char[]>(fileSize + 1);
     file.read(fileContent.get(), fileSize);
+    file.close();
 
     //  déchiffrement des données
     std::stringstream accountData;
@@ -179,9 +167,9 @@ bool Keepass::restore(std::ifstream &file, const size_t fileSize)
     }
     catch (std::invalid_argument const &erreur)
     {
-        file.close();
         return false;
     }
+    this->stateSave = StateSave::Restored;
 
     // Restauration des données
     std::string accountEncode;
@@ -190,12 +178,15 @@ bool Keepass::restore(std::ifstream &file, const size_t fileSize)
         AccountEntries accountDecode = this->decode(accountEncode);
         this->add(accountDecode.platform, accountDecode.ID.username, accountDecode.ID.password);
     }
-    file.close();
     return true;
 }
 
 bool Keepass::add(const std::string &platform, const std::string &username, const std::string &password)
 {
+    if (!(this->stateSave == StateSave::Created || this->stateSave == StateSave::Restored))
+    {
+        throw std::invalid_argument("Méthode Keepass::add : Le fichier de restauration n'a pas été initialisé");
+    }
     enum Incorrect IntegrityEntries = checkEntry(platform, username, password);
     if (IntegrityEntries == Incorrect::All)
     {

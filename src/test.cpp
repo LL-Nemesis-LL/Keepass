@@ -5,18 +5,30 @@
 #include <fstream>
 #include <memory>
 #include <cstdio>
+#include <array>
 
 void test()
 {
 
     std::string fileName = "test.txt";
-
+    std::array<std::string, 5> errorMessages{
+        "The password is too long",
+        "The password is too short",
+        "The file '10-million-password...' has been corrumped",
+        "The file '10-million-password...' isn't opened",
+        "The password is too easy"};
     std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>();
-    std::string key = safeDeposit->generatePassword();
-    StateSave state = safeDeposit->open(fileName, key);
-    assert(state == StateSave::Created || state == StateSave::Restored);
-
-    const std::string platform = "Google";
+    const std::string key = safeDeposit->generatePassword();
+    try
+    {
+        safeDeposit->open(fileName, key);
+    }
+    catch (std::exception &error)
+    {
+        std::cerr << error.what() << std::endl;
+        return;
+    }
+    const std::string platform("Google");
     const std::string user = "Marc-Antoine";
     const std::string password = "Tetris123@";
 
@@ -53,12 +65,53 @@ void test()
 
     std::unique_ptr<Keepass> safeDepositRestauration = std::make_unique<Keepass>();
 
-    assert(safeDepositRestauration->open(fileNameCheckPassword, "little") == StateSave::TooShort);
-    assert(safeDepositRestauration->open(fileNameCheckPassword, "password too long") == StateSave::TooLong);
-    assert(safeDepositRestauration->open(fileNameCheckPassword, "qwertyuiop") == StateSave::TooEasy);
+    try
+    {
+        safeDepositRestauration->open(fileNameCheckPassword, "little");
+    }
+    catch (std::invalid_argument &error)
+    {
+        if (errorMessages[1].compare(error.what()) != 0)
+        {
+            std::cerr << "Erreur test: " << error.what() << std::endl;
+            throw;
+        }
+    }
+    try
+    {
+        safeDepositRestauration->open(fileNameCheckPassword, "password too long");
+    }
+    catch (std::invalid_argument &error)
+    {
+        if (errorMessages[0].compare(error.what()) != 0)
+        {
+            std::cerr << "Erreur test: " << error.what() << std::endl;
+            throw;
+        }
+    }
+    try
+    {
+        safeDepositRestauration->open(fileNameCheckPassword, "qwertyuiop");
+    }
+    catch (std::invalid_argument &error)
+    {
+        if (errorMessages[4].compare(error.what()) != 0)
+        {
+            std::cerr << "Erreur test: " << error.what() << std::endl;
+            throw;
+        }
+    }
 
     // Test restauration et de déchirement
-    assert(safeDepositRestauration->open(fileName, key) == StateSave::Restored);
+    try
+    {
+        safeDepositRestauration->open(fileName, key);
+    }
+    catch (std::invalid_argument &error)
+    {
+        std::cerr << "Erreur test, fonction open, Test restauration" << error.what() << std::endl;
+        throw;
+    }
 
     it = safeDepositRestauration->get(platform);
 
@@ -78,6 +131,5 @@ void test()
     // Supression du fichier de test
     safeDepositRestauration.reset();
     assert(remove(fileName.data()) == 0);
-
     std::cout << "Test ok" << std::endl;
 }

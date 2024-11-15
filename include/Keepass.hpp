@@ -6,8 +6,8 @@
 #include <sstream>
 #include "AES.hpp"
 
-const char sepEntries = '\\';
-const int __maxSizePassword{16};
+static constexpr char sepEntries = '\\';
+static constexpr int __maxSizePassword{16};
 
 enum class Incorrect
 {
@@ -47,8 +47,7 @@ class Keepass
 
 public:
     std::string generatePassword();
-    enum StateSave checkKey(const std::string &key);
-    enum StateSave open(const std::string &fileName, const std::string &key);
+    void open(const std::string &fileName, const std::string &key);
     bool add(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries>::iterator get(const std::string &plateform);
     bool exists(const std::string &platform);
@@ -59,6 +58,7 @@ private:
     std::string _fileSaveName;
     std::string _key;
     StateSave stateSave = StateSave::Error;
+    void checkKey(const std::string &key);
     bool restore(std::ifstream &file, const size_t fileSize);
     enum Incorrect checkEntry(const std::string &platform, const std::string &username, const std::string &password);
     std::map<std::string, IDEntries> safeDepositAccount;

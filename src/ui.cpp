@@ -68,50 +68,58 @@ void ui()
 
     std::string key = getKey();
     Keepass safeDeposit;
-    StateSave state = safeDeposit.open(fileName, key);
-
-    switch (state)
+    try
     {
-    case StateSave::Invalid:
-        while (state == StateSave::Invalid)
-        {
-            std::cout << std::endl
-                      << "Le mot de passe de la sauvegarde que vous tentez d'ouvrir," << std::endl
-                      << "n'est pas le bon." << std::endl
-                      << std::endl;
-            std::string fileName = getFile();
-            std::string key = getKey();
-            state = safeDeposit.open(fileName, key);
-        }
-        break;
-    case StateSave::Created:
-        std::cout << std::endl
-                  << "Votre fichier sera créé une fois le programme fermer" << std::endl
-                  << std::endl;
-        break;
-    case StateSave::Restored:
-        std::cout << std::endl
-                  << "Votre sauvegarde a été restauré" << std::endl
-                  << std::endl;
-        break;
-    case StateSave::TooShort:
-        std::cout << std::endl
-                  << "Votre mot de passe est trop court (8 caracteres minimum)" << std::endl
-                  << std::endl;
-        break;
-    case StateSave::TooLong:
-        std::cout << std::endl
-                  << "Votre mot de passe est trop long (16 caracteres maximum)" << std::endl
-                  << std::endl;
-        break;
-    case StateSave::TooEasy:
-        std::cout << std::endl
-                  << "Votre mot de passe est trop facile" << std::endl
-                  << std::endl;
-        break;
-    default:
-        break;
+        safeDeposit.open(fileName, key);
     }
+    catch (std::invalid_argument &error)
+    {
+        std::cerr << error.what() << std::endl;
+    }
+    /*
+        switch (state)
+        {
+        case StateSave::Invalid:
+            while (state == StateSave::Invalid)
+            {
+                std::cout << std::endl
+                          << "Le mot de passe de la sauvegarde que vous tentez d'ouvrir," << std::endl
+                          << "n'est pas le bon." << std::endl
+                          << std::endl;
+                std::string fileName = getFile();
+                std::string key = getKey();
+                state = safeDeposit.open(fileName, key);
+            }
+            break;
+        case StateSave::Created:
+            std::cout << std::endl
+                      << "Votre fichier sera créé une fois le programme fermer" << std::endl
+                      << std::endl;
+            break;
+        case StateSave::Restored:
+            std::cout << std::endl
+                      << "Votre sauvegarde a été restauré" << std::endl
+                      << std::endl;
+            break;
+        case StateSave::TooShort:
+            std::cout << std::endl
+                      << "Votre mot de passe est trop court (8 caracteres minimum)" << std::endl
+                      << std::endl;
+            break;
+        case StateSave::TooLong:
+            std::cout << std::endl
+                      << "Votre mot de passe est trop long (16 caracteres maximum)" << std::endl
+                      << std::endl;
+            break;
+        case StateSave::TooEasy:
+            std::cout << std::endl
+                      << "Votre mot de passe est trop facile" << std::endl
+                      << std::endl;
+            break;
+        default:
+            break;
+        }
+        */
     std::string command, platform, username, password;
     std::map<std::string, IDEntries>::iterator it;
     while (true)
