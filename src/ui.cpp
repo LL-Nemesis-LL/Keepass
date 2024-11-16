@@ -121,7 +121,6 @@ void ui()
         }
         */
     std::string command, platform, username, password;
-    std::map<std::string, IDEntries>::iterator it;
     while (true)
     {
         std::cout << "(A: ajouter, a: afficher, q: quitter" << std::endl;
@@ -164,7 +163,7 @@ void ui()
             std::getline(std::cin, platform);
             if (safeDeposit.exists(platform))
             {
-                it = safeDeposit.get(platform);
+                std::map<std::string, IDEntries>::const_iterator it = safeDeposit.get(platform);
                 std::cout << std::endl
                           << "Plateforme : " << it->first << std::endl;
                 std::cout << "Nom utilisateur : " << it->second.username << std::endl;
