@@ -5,18 +5,17 @@
 #include <fstream>
 #include <memory>
 #include <cstdio>
-#include <array>
+
+struct Pair_ErrorAndMessageError
+{
+    std::string error;
+    std::string messageError;
+};
 
 void test()
 {
 
-    std::string fileName = "test.txt";
-    std::array<std::string, 5> errorMessages{
-        "The password is too long",
-        "The password is too short",
-        "The file '10-million-password...' has been corrumped",
-        "The file '10-million-password...' isn't opened",
-        "The password is too easy"};
+    const std::string fileName = "test.txt";
     std::unique_ptr<Keepass> safeDeposit = std::make_unique<Keepass>();
     const std::string key = safeDeposit->generatePassword();
     try
@@ -29,8 +28,8 @@ void test()
         return;
     }
     const std::string platform("Google");
-    const std::string user = "Marc-Antoine";
-    const std::string password = "Tetris123@";
+    const std::string user("Marc-Antoine");
+    const std::string password("Tetris123@");
 
     // Test d'ajout
     assert(safeDeposit->add(platform, user, password) == true);
@@ -52,7 +51,7 @@ void test()
 
     // Test vérification de mot de passe
 
-    std::string fileNameCheckPassword = "test2.txt";
+    const std::string fileNameCheckPassword = "test2.txt";
     std::ifstream file2(fileNameCheckPassword);
     if (file2.is_open() == 1)
     {
@@ -65,40 +64,24 @@ void test()
 
     std::unique_ptr<Keepass> safeDepositRestauration = std::make_unique<Keepass>();
 
-    try
+    // Test de la complexité d'un mot de passe
+    std::array<Pair_ErrorAndMessageError, 3> errorMessages;
+    errorMessages[0] = {"litte", "The password is too short"};
+    errorMessages[1] = {"password too long", "The password is too long"};
+    errorMessages[2] = {"qwertyuiop", "The password is too easy"};
+    for (size_t i = 0; i < errorMessages.size(); i++)
     {
-        safeDepositRestauration->open(fileNameCheckPassword, "little");
-    }
-    catch (std::invalid_argument &error)
-    {
-        if (errorMessages[1].compare(error.what()) != 0)
+        try
         {
-            std::cerr << "Erreur test: " << error.what() << std::endl;
-            throw;
+            safeDepositRestauration->open(fileNameCheckPassword, errorMessages[i].error);
         }
-    }
-    try
-    {
-        safeDepositRestauration->open(fileNameCheckPassword, "password too long");
-    }
-    catch (std::invalid_argument &error)
-    {
-        if (errorMessages[0].compare(error.what()) != 0)
+        catch (std::invalid_argument &error)
         {
-            std::cerr << "Erreur test: " << error.what() << std::endl;
-            throw;
-        }
-    }
-    try
-    {
-        safeDepositRestauration->open(fileNameCheckPassword, "qwertyuiop");
-    }
-    catch (std::invalid_argument &error)
-    {
-        if (errorMessages[4].compare(error.what()) != 0)
-        {
-            std::cerr << "Erreur test: " << error.what() << std::endl;
-            throw;
+            if (errorMessages[i].messageError.compare(error.what()) != 0)
+            {
+                std::cerr << "Erreur test: " << error.what() << std::endl;
+                throw;
+            }
         }
     }
 
@@ -120,7 +103,6 @@ void test()
     assert(it->second.password.compare(password) == 0);
 
     // Test de la méthode "exist"
-
     assert(safeDepositRestauration->exists(platform) == true);
     assert(safeDepositRestauration->exists("aleatoire") == false);
 
