@@ -49,8 +49,8 @@ public:
     std::string generatePassword();
     void open(const std::string &fileName, const std::string &key);
     bool add(const std::string &platform, const std::string &username, const std::string &password);
-    std::map<std::string, IDEntries>::iterator get(const std::string &plateform);
-    bool exists(const std::string &platform);
+    std::map<std::string, IDEntries>::const_iterator get(const std::string &plateform) const;
+    bool exists(const std::string &platform) const;
     bool remove(const std::string &platforme);
     ~Keepass();
 
@@ -60,10 +60,10 @@ private:
     StateSave stateSave = StateSave::Error;
     void checkKey(const std::string &key);
     bool restore(std::ifstream &file, const size_t fileSize);
-    enum Incorrect checkEntry(const std::string &platform, const std::string &username, const std::string &password);
+    enum Incorrect checkEntry(const std::string &platform, const std::string &username, const std::string &password) const;
     std::map<std::string, IDEntries> safeDepositAccount;
-    std::string encode(std::map<std::string, IDEntries>::iterator &it);
-    AccountEntries decode(std::string content);
+    std::string encode(const std::map<std::string, IDEntries>::const_iterator &it) const;
+    AccountEntries decode(const std::string content) const;
     EasyAES aes;
     std::string formatForSave();
 };

@@ -197,9 +197,9 @@ bool Keepass::add(const std::string &platform, const std::string &username, cons
     return true;
 }
 
-bool Keepass::exists(const std::string &platform)
+bool Keepass::exists(const std::string &platform) const
 {
-    std::map<std::string, IDEntries>::iterator It;
+    std::map<std::string, IDEntries>::const_iterator It;
     for (It = std::begin(this->safeDepositAccount); It != this->safeDepositAccount.end(); ++It)
     {
         if (platform.compare(It->first) == 0)
@@ -220,7 +220,7 @@ bool Keepass::remove(const std::string &platform)
     return false;
 }
 
-enum Incorrect Keepass::checkEntry(const std::string &platform, const std::string &username, const std::string &password)
+enum Incorrect Keepass::checkEntry(const std::string &platform, const std::string &username, const std::string &password) const
 {
     bool checkPlatform = platform.find(sepEntries) == std::string::npos;
     bool checkUsername = username.find(sepEntries) == std::string::npos;
@@ -235,9 +235,9 @@ enum Incorrect Keepass::checkEntry(const std::string &platform, const std::strin
     }
 }
 
-std::map<std::string, IDEntries>::iterator Keepass::get(const std::string &platform)
+std::map<std::string, IDEntries>::const_iterator Keepass::get(const std::string &platform) const
 {
-    std::map<std::string, IDEntries>::iterator it;
+    std::map<std::string, IDEntries>::const_iterator it;
     for (it = std::begin(this->safeDepositAccount); it != std::end(safeDepositAccount); ++it)
     {
         if (platform.compare(it->first) == 0)
@@ -248,7 +248,7 @@ std::map<std::string, IDEntries>::iterator Keepass::get(const std::string &platf
     return it;
 }
 
-std::string Keepass::encode(std::map<std::string, IDEntries>::iterator &it)
+std::string Keepass::encode(const std::map<std::string, IDEntries>::const_iterator &it) const
 {
     std::stringstream accountEncode;
 
@@ -256,7 +256,7 @@ std::string Keepass::encode(std::map<std::string, IDEntries>::iterator &it)
     return accountEncode.str();
 }
 
-AccountEntries Keepass::decode(std::string accountEncode)
+AccountEntries Keepass::decode(const std::string accountEncode) const
 {
     AccountEntries entries;
     size_t usernameIndex = accountEncode.find(sepEntries) + 1;
